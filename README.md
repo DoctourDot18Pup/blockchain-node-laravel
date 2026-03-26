@@ -1,58 +1,187 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Blockchain Node - Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Nodo independiente de una red blockchain distribuida para la gestión de grados académicos, implementado con Laravel 11 y PostgreSQL (Supabase).
 
-## About Laravel
+## Descripción
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Este nodo forma parte de una red blockchain distribuida donde cada integrante opera de forma autónoma pero interconectada. Cada nodo mantiene su propia cadena de bloques, gestiona transacciones pendientes, realiza el proceso de minado con Proof of Work y se sincroniza con los demás nodos mediante un algoritmo de consenso.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+La lógica de negocio gestiona grados académicos, donde cada registro funciona como un bloque dentro de la cadena, integrando hash SHA256, hash anterior y nonce para garantizar la integridad de la información.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tecnologias
 
-## Learning Laravel
+- PHP 8.4
+- Laravel 11
+- PostgreSQL (Supabase - Transaction Pooler)
+- Eloquent ORM
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requisitos
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.1 o superior
+- Composer 2.x
+- Extensiones PHP: pgsql, pdo_pgsql, intl
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Instalacion
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+1. Clonar el repositorio:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/TU_USUARIO/blockchain-node-laravel.git
+cd blockchain-node-laravel
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. Instalar dependencias:
+```bash
+composer install
+```
 
-## Contributing
+3. Copiar el archivo de entorno:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Configurar las variables de entorno en `.env`:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=aws-1-us-east-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.TU_PROJECT_REF
+DB_PASSWORD=TU_PASSWORD
+DB_SSLMODE=require
+SESSION_DRIVER=cookie
+```
 
-## Code of Conduct
+5. Verificar la conexion a la base de datos:
+```bash
+php artisan db:show
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. Levantar el servidor:
+```bash
+php artisan serve --port=8004
+```
 
-## Security Vulnerabilities
+## Estructura del Proyecto
+```
+app/
+├── Http/Controllers/
+│   ├── BlockchainController.php   # Cadena, minado y recepcion de bloques
+│   ├── TransactionController.php  # Gestion de transacciones
+│   └── NodeController.php         # Registro de nodos y consenso
+├── Models/
+│   ├── Grado.php                  # Bloque de la cadena
+│   ├── Persona.php
+│   ├── Institucion.php
+│   ├── Programa.php
+│   ├── NivelGrado.php
+│   ├── Nodo.php
+│   └── TransaccionPendiente.php
+└── Services/
+    └── BlockchainService.php      # Logica central del blockchain
+routes/
+└── api.php                        # Definicion de endpoints
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## API Endpoints
 
-## License
+### Blockchain
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| GET | /api/chain | Obtener la cadena completa |
+| POST | /api/mine | Minar transacciones pendientes |
+| POST | /api/blocks/receive | Recibir bloque de otro nodo |
+
+### Transacciones
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| POST | /api/transactions | Crear y propagar transaccion |
+| GET | /api/transactions/pending | Listar transacciones pendientes |
+
+### Nodos
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| POST | /api/nodes/register | Registrar un nodo en la red |
+| GET | /api/nodes | Listar nodos registrados |
+| GET | /api/nodes/resolve | Resolver conflictos por consenso |
+
+## Logica Blockchain
+
+### Hash
+
+Cada bloque calcula su hash con SHA256 sobre la combinacion de:
+```
+SHA256(persona_id + institucion_id + titulo_obtenido + fecha_fin + hash_anterior + nonce)
+```
+
+### Proof of Work
+
+El minado busca un nonce tal que el hash resultante inicie con `000`. El proceso itera incrementando el nonce hasta encontrar un hash valido.
+
+### Consenso
+
+Al invocar `/api/nodes/resolve`, el nodo consulta la cadena de todos los nodos registrados y adopta la cadena valida mas larga, garantizando consistencia distribuida.
+
+### Propagacion
+
+Al crear una transaccion o minar un bloque, el nodo propaga automaticamente la informacion a todos los nodos registrados en la red.
+
+## Base de Datos
+
+El esquema incluye las siguientes tablas en Supabase:
+
+- `personas` - Datos del titular del grado
+- `instituciones` - Instituciones educativas
+`niveles_grado` - Niveles academicos (Licenciatura, Maestria, etc.)
+- `programas` - Programas academicos
+- `grados` - Bloques de la cadena con campos blockchain
+- `nodos` - Nodos registrados en la red
+- `transacciones_pendientes` - Transacciones en espera de minado
+
+## Puertos de la Red
+
+| Nodo | Tecnologia | Puerto |
+|------|-----------|--------|
+| Nodo 1 | Express | :8001 |
+| Nodo 2 | Express | :8002 |
+| Nodo 3 | Laravel | :8004 |
+| Nodo 4 | Laravel | :8005 |
+
+## Fases de Prueba
+
+### Fase 1 - Setup
+Levantar el nodo en el puerto asignado y verificar conexion a Supabase.
+
+### Fase 2 - Registro
+Registrar manualmente los nodos entre si para formar la red:
+```bash
+curl -X POST http://localhost:8004/api/nodes/register \
+  -H "Content-Type: application/json" \
+  -d '{"url": "http://localhost:8001"}'
+```
+
+### Fase 3 - Pruebas de Red
+Crear una transaccion y verificar que llegue a los demas nodos. Minar en este nodo y verificar sincronizacion.
+
+### Fase 4 - Consenso
+Provocar conflictos minando en dos nodos simultaneamente y resolver con:
+```bash
+curl http://localhost:8004/api/nodes/resolve
+```
+
+## Logs
+
+Todos los eventos importantes se registran en `storage/logs/laravel.log`:
+```bash
+tail -f storage/logs/laravel.log
+```
+
+Eventos registrados:
+- Transacciones creadas y propagadas
+- Bloques minados con nonce y hash
+- Propagacion a otros nodos
+- Proceso de consenso y reemplazo de cadena
+- Nodos no disponibles durante propagacion
